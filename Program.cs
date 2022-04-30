@@ -7,12 +7,28 @@ namespace JogoDaVelha
         static void Main(string[] args)
         {
             No noRaiz = new No();
+            noRaiz.Jogo = new int[3,3]{
+                {1, -1, 1},
+                {-1, 1, -1},
+                {-1, 0, 0}
+            };
 
-            Console.WriteLine("Quem começará jogando? [1 - Jogador | -1 - Máquina]");
+            Console.WriteLine("Quem começará jogando? [1 - Máquina | -1 - Jogador]");
             var quemEstaJogando = int.Parse(Console.ReadLine());
 
             PreencheArvore(noRaiz, quemEstaJogando);
             AvaliaMiniMax(noRaiz, quemEstaJogando);
+            switch(noRaiz.ValorMinMax)
+            {
+                case 0: Console.WriteLine("Empate");
+                        break;
+                case 1: Console.WriteLine("Maquina");
+                        break;
+                case -1: Console.WriteLine("humano");
+                        break;
+                default: Console.WriteLine("Bugou");
+                        break;
+            }
         }
 
         public static void PreencheArvore(No noPai, int quemEstaJogando)
@@ -30,10 +46,12 @@ namespace JogoDaVelha
 
                         if (quemEstaJogando == 1)
                         {
+                            filho.ValorMinMax = int.MaxValue;
                             PreencheArvore(filho, -1);
                         }
                         else
                         {
+                            filho.ValorMinMax = int.MinValue;
                             PreencheArvore(filho, 1);
                         }
                     }
@@ -41,31 +59,47 @@ namespace JogoDaVelha
             }
         }
 
-        public static void AvaliaMiniMax(No no, int jogador)
+        public static int AvaliaMiniMax(No no, int proximoJogador)
         {
             var ganhador = no.EncontraGanhador();
-            if (ganhador != 0)
+            if (ganhador != 2)
             {
                 // Verifica minimax
+                if(ganhador == 1) {
+                    return 1;
+                } else if(ganhador == -1) {
+                    return -1;
+                } else {
+                    return 0;
+                }
             }
             else
             {
-                if (jogador == -1)
+                if (proximoJogador == -1)
                 {
                     // minimizacao
                     for (int i = 0; i < no.Filhos.Count; i++)
                     {
+                        var resultado = AvaliaMiniMax(no.Filhos[i], proximoJogador*(-1));
+                        if(resultado < no.ValorMinMax)
+                            no.ValorMinMax = resultado;
                     }
+                    return no.ValorMinMax;
                 }
-                else if (jogador == 1)
+                else if (proximoJogador == 1)
                 {
                     // maximizacao
                     for (int i = 0; i < no.Filhos.Count; i++)
                     {
+                        var resultado = AvaliaMiniMax(no.Filhos[i], proximoJogador*(-1));
+                        if(resultado > no.ValorMinMax)
+                            no.ValorMinMax = resultado;
                     }
+                    return no.ValorMinMax;
                 }
 
             }
+            return 0;
         }
     }
 }
