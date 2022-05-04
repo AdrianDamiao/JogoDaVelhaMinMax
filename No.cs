@@ -44,6 +44,11 @@ namespace JogoDaVelha
                 return Jogo[0, 0];
             }
 
+            if (Jogo[2, 0] == Jogo[1, 1] && Jogo[1, 1] == Jogo[0, 2])
+            {
+                return Jogo[0, 0];
+            }
+
             return 2; // ninguem ganhou
         }
     }

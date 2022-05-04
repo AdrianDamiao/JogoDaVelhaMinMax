@@ -18,6 +18,8 @@ namespace JogoDaVelha
 
             PreencheArvore(noRaiz, quemEstaJogando);
             AvaliaMiniMax(noRaiz, quemEstaJogando);
+
+            // Resultado
             switch(noRaiz.ValorMinMax)
             {
                 case 0: Console.WriteLine("Empate");
@@ -44,6 +46,7 @@ namespace JogoDaVelha
                         filho.Jogo[i, j] = quemEstaJogando;
                         noPai.Filhos.Add(filho);
 
+                        ListaMatriz(filho.Jogo);
                         if (quemEstaJogando == 1)
                         {
                             filho.ValorMinMax = int.MaxValue;
@@ -64,7 +67,7 @@ namespace JogoDaVelha
             var ganhador = no.EncontraGanhador();
             if (ganhador != 2)
             {
-                // Verifica minimax
+                // Verificar o minimax
                 if(ganhador == 1) {
                     return 1;
                 } else if(ganhador == -1) {
@@ -77,7 +80,7 @@ namespace JogoDaVelha
             {
                 if (proximoJogador == -1)
                 {
-                    // minimizacao
+                    // Se é minimização
                     for (int i = 0; i < no.Filhos.Count; i++)
                     {
                         var resultado = AvaliaMiniMax(no.Filhos[i], proximoJogador*(-1));
@@ -88,7 +91,7 @@ namespace JogoDaVelha
                 }
                 else if (proximoJogador == 1)
                 {
-                    // maximizacao
+                    // Se é maximização
                     for (int i = 0; i < no.Filhos.Count; i++)
                     {
                         var resultado = AvaliaMiniMax(no.Filhos[i], proximoJogador*(-1));
@@ -101,5 +104,18 @@ namespace JogoDaVelha
             }
             return 0;
         }
+
+        public static void ListaMatriz(int [,] jogo)
+        {
+            System.Console.WriteLine("Jogo no momento\n");
+            for(int i = 0; i < 3; i++)
+            {
+                for(int j = 0; j < 3; j++)
+                {
+                    System.Console.Write("| "+ jogo[i, j] + " |");
+                }
+                System.Console.WriteLine("");
+            }
+        }        
     }
 }
