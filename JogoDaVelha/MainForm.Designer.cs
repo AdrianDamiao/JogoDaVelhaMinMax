@@ -38,13 +38,13 @@
             this.button3 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.player = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.button7 = new System.Windows.Forms.Button();
             this.button9 = new System.Windows.Forms.Button();
             this.buttonRestart = new System.Windows.Forms.Button();
             this.buttonStart = new System.Windows.Forms.Button();
+            this.labelDisplay = new System.Windows.Forms.Label();
             this.buttonsPanel.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -149,22 +149,13 @@
             // 
             // panel1
             // 
-            this.panel1.Controls.Add(this.player);
+            this.panel1.Controls.Add(this.labelDisplay);
             this.panel1.Controls.Add(this.label2);
             this.panel1.Controls.Add(this.label1);
             this.panel1.Location = new System.Drawing.Point(12, 547);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(580, 122);
             this.panel1.TabIndex = 1;
-            // 
-            // player
-            // 
-            this.player.AutoSize = true;
-            this.player.Location = new System.Drawing.Point(408, 42);
-            this.player.Name = "player";
-            this.player.Size = new System.Drawing.Size(38, 15);
-            this.player.TabIndex = 1;
-            this.player.Text = "label3";
             // 
             // label2
             // 
@@ -228,6 +219,15 @@
             this.buttonStart.UseVisualStyleBackColor = false;
             this.buttonStart.Click += new System.EventHandler(this.buttonStart_Click);
             // 
+            // labelDisplay
+            // 
+            this.labelDisplay.AutoSize = true;
+            this.labelDisplay.Location = new System.Drawing.Point(370, 45);
+            this.labelDisplay.Name = "labelDisplay";
+            this.labelDisplay.Size = new System.Drawing.Size(70, 15);
+            this.labelDisplay.TabIndex = 1;
+            this.labelDisplay.Text = "labelDisplay";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -270,7 +270,7 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button buttonRestart;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label player;
         private System.Windows.Forms.Button buttonStart;
+        private System.Windows.Forms.Label labelDisplay;
     }
 }
