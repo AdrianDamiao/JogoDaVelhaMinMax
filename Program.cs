@@ -46,7 +46,7 @@ namespace JogoDaVelha
                         filho.Jogo[i, j] = quemEstaJogando;
                         noPai.Filhos.Add(filho);
 
-                        ListaMatriz(filho.Jogo);
+                        //ListaMatriz(filho.Jogo);
                         if (quemEstaJogando == 1)
                         {
                             filho.ValorMinMax = int.MaxValue;
@@ -61,7 +61,7 @@ namespace JogoDaVelha
                 }
             }
         }
-
+        
         public static int AvaliaMiniMax(No no, int proximoJogador)
         {
             var ganhador = no.EncontraGanhador();
