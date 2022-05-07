@@ -7,11 +7,11 @@ using System.Windows.Forms;
 
 namespace JogoDaVelha.Forms
 {
-    public static class Prompt
+    public static class ChoosePlayer
     {
         public static string ShowDialog(string text, string caption)
         {
-            Form prompt = new Form()
+            Form choosePlayer = new Form()
             {
                 Width = 500,
                 Height = 150,
@@ -25,22 +25,22 @@ namespace JogoDaVelha.Forms
             Button confirmacaoMaquina = new Button() { Text = "Maquina", Left = 150, Width = 100, Top = 70, DialogResult = DialogResult.OK };
             confirmacaoMaquina.Click += (sender, e) => {
                 jogador.Text = "Maquina";
-                prompt.Close();
+                choosePlayer.Close();
             };
 
             Button confirmacaoHumano = new Button() { Text = "Humano", Left = 250, Width = 100, Top = 70, DialogResult = DialogResult.OK };
             confirmacaoHumano.Click += (sender, e) => {
                 jogador.Text = "Humano";
-                prompt.Close(); 
+                choosePlayer.Close(); 
             };
 
-            prompt.Controls.Add(confirmacaoMaquina);
-            prompt.Controls.Add(confirmacaoHumano);
-            prompt.Controls.Add(jogador);
-            prompt.AcceptButton = confirmacaoMaquina;
-            prompt.CancelButton = confirmacaoHumano;
+            choosePlayer.Controls.Add(confirmacaoMaquina);
+            choosePlayer.Controls.Add(confirmacaoHumano);
+            choosePlayer.Controls.Add(jogador);
+            choosePlayer.AcceptButton = confirmacaoMaquina;
+            choosePlayer.CancelButton = confirmacaoHumano;
 
-            return prompt.ShowDialog() == DialogResult.OK ? jogador.Text : "";
+            return choosePlayer.ShowDialog() == DialogResult.OK ? jogador.Text : "";
         }
     }
 }

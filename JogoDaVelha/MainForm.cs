@@ -1,8 +1,11 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Media;
+using System.Threading;
 using System.Windows.Forms;
 using JogoDaVelha.Engine;
+using JogoDaVelha.Extensions;
 using JogoDaVelha.Forms;
 
 namespace JogoDaVelha
@@ -11,6 +14,7 @@ namespace JogoDaVelha
     {
         public static int jogador = 0;
         public static int[,] tabuleiro = new int[3,3];
+        public static bool continua = false;
     
 
         public MainForm()
@@ -23,10 +27,10 @@ namespace JogoDaVelha
             No noRaiz = new No();
             noRaiz.Jogo = new int[3, 3];
 
-            Console.WriteLine("Quem começará jogando? [1 - Máquina | -1 - Jogador]");
-            var quemEstaJogando = 1;
-            string promptValue = Prompt.ShowDialog("Test", "123");
+
+            string promptValue = ChoosePlayer.ShowDialog("Quem começará jogando?", "Escolher o jogador");
             labelDisplay.Text = promptValue;
+            var quemEstaJogando = promptValue.Equals("Maquina") ? 1 : 0;
 
             PreencheArvore(noRaiz, quemEstaJogando);
             AvaliaMiniMax(noRaiz, quemEstaJogando);
@@ -105,7 +109,7 @@ namespace JogoDaVelha
                     for (int i = 0; i < no.Filhos.Count; i++)
                     {
                         var resultado = AvaliaMiniMax(no.Filhos[i], proximoJogador * (-1));
-                        if (resultado > no.ValorMinMax)
+                        if (resultado < no.ValorMinMax)
                             no.ValorMinMax = resultado;
                     }
                     return no.ValorMinMax;
@@ -116,7 +120,7 @@ namespace JogoDaVelha
                     for (int i = 0; i < no.Filhos.Count; i++)
                     {
                         var resultado = AvaliaMiniMax(no.Filhos[i], proximoJogador * (-1));
-                        if (resultado < no.ValorMinMax)
+                        if (resultado > no.ValorMinMax)
                             no.ValorMinMax = resultado;
                     }
                     return no.ValorMinMax;
@@ -128,34 +132,55 @@ namespace JogoDaVelha
 
         public int IniciaJogo(No no, int proximoJogador)
         {
+            labelDisplay.Text = SubstituiCaracter(proximoJogador);
             SoundPlayer simpleSound2 = new SoundPlayer(@"c:\Windows\Media\chimes.wav");
             simpleSound2.Play();
             DialogResult dlgResult = MessageBox.Show("É a vez do " + SubstituiCaracter(proximoJogador) + " jogar", "Vez de quem?");
             if (dlgResult == DialogResult.OK)
             {
-                MarcaTabuleiro(no.Jogo, proximoJogador);
+                AtualizaTabuleiro(no.Jogo);
+                MarcaTabuleiro(tabuleiro);
                 if (proximoJogador == 1)
                 {
-                    for(int i = 0; i < no.Filhos.Count; i++)
+                    int melhorPontuacao = Int32.MinValue;
+                    int melhorFilho = 0;
+                    for (int i = 0; i < no.Filhos.Count; i++)
                     {
-                        var jogadaMelhor = no.Filhos.Max(a => a.ValorMinMax); 
+                        if (no.Filhos[i].ValorMinMax > melhorPontuacao)
+                        {
+                            melhorPontuacao = no.Filhos[i].ValorMinMax;
+                            melhorFilho = i;
+                        }
                         //Verificar o filho de maior pontuação para aquele tabuleiro jogar nela e chamar a recursão
                     }
-                    proximoJogador = -1;
-                    IniciaJogo(no, proximoJogador);
+
+                    jogador = proximoJogador;
+                    IniciaJogo(no.Filhos[melhorFilho], proximoJogador*(-1));
                 }
                 else
                 {
-                    proximoJogador = 1;
-                    no.Jogo[0, 1] = -1;
-                    for(int i = 0; i <= no.Filhos.Count; i++)
+                    jogador = proximoJogador;
+                    button1.UseWaitCursor = true;
+                    button1.Click += (sender, e) =>
                     {
-                        if(ComparaTabuleiro(no.Jogo))
+
+                        if (button1.DialogResult == DialogResult.OK)
                         {
-                            IniciaJogo(no.Filhos[i], proximoJogador);
+                            int filhoCorreto = 0;
+                            continua = false;
+                            foreach (var (filho, index) in no.Filhos.LoopIndex())
+                            {
+                                if (ComparaTabuleiro(filho.Jogo))
+                                {
+                                    filhoCorreto = index;
+                                }
+                            }
+
+                            IniciaJogo(no.Filhos[filhoCorreto], proximoJogador * (-1));
                         }
-                       // Escolher onde quer jogar, se estiver disponivel jogar e chamar a recursao
-                    }
+                    };
+
+                    // Escolher onde quer jogar, se estiver disponivel jogar e chamar a recursao
                 }
 
             }
@@ -168,21 +193,33 @@ namespace JogoDaVelha
             {
                 for(int j = 0; j < 3; j++)
                 {
-                    if(jogoDoNo[i, j] == tabuleiro[i, j])
+                    if(jogoDoNo[i, j] != tabuleiro[i, j])
                     {
-                        return true;
+                        return false;
                     }
                 }
             }
-            return false;
+            return true;
         }
 
-        public void MarcaTabuleiro(int[,] jogo, int jogadorSimbolo)
+        public void AtualizaTabuleiro(int[,] jogo)
         {
             for (int i = 0; i < 3; i++)
             {
                 for (int j = 0; j < 3; j++)
                 {
+                    tabuleiro[i, j] = jogo[i,j];
+                }
+            }
+        }
+
+        public void MarcaTabuleiro(int[,] jogo)
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    //tabuleiro[i, j] = jogo[i, j];
                     if (i == 0 && j == 0)
                         this.button1.Text = SubstituiCaracter(jogo[i, j]);
                     else if (i == 0 && j == 1)
@@ -215,12 +252,37 @@ namespace JogoDaVelha
             };
         }
 
-        // Ações dos botões
-        private void Button1_Click(object sender, EventArgs e)
+        private void button1_Click(object sender, EventArgs e, No no)
         {
             Button button = (Button)sender;
-            button.Text = button.Name;
-            MessageBox.Show("Olá mundo");
+            if (!string.IsNullOrEmpty(button.Text))
+            {
+                DialogResult dialogResult = MessageBox.Show("Você não pode jogar aqui", "Jogada inválida", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                button.Text = SubstituiCaracter(jogador);
+                AtualizaPorTabIndex(button.TabIndex);
+
+                button.DialogResult = DialogResult.OK;
+            }
+        }
+
+        private int AtualizaPorTabIndex(int tabIndex)
+        {
+            return tabIndex switch
+            {
+                1 => tabuleiro[0, 0] = jogador,
+                2 => tabuleiro[0, 1] = jogador,
+                3 => tabuleiro[0, 2] = jogador,
+                4 => tabuleiro[1, 0] = jogador,
+                5 => tabuleiro[1, 1] = jogador,
+                6 => tabuleiro[1, 2] = jogador,
+                7 => tabuleiro[2, 0] = jogador,
+                8 => tabuleiro[2, 1] = jogador,
+                9 => tabuleiro[2, 2] = jogador,
+                _ => 0,
+            };
         }
 
         private void buttonStart_Click(object sender, EventArgs e)
