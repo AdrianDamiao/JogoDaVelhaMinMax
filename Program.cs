@@ -15,7 +15,7 @@ namespace JogoDaVelhaConsole
             JogoDaVelha();
         }
 
-        public static void JogoDaVelha()
+        private static void JogoDaVelha()
         {
             ConsoleExtension.ExibeMensagemDeBemVindo();
             
@@ -25,7 +25,7 @@ namespace JogoDaVelhaConsole
             IniciaJogo(configuracao.noRaiz, configuracao.quemComecaJogando);
         }
 
-        public static (int dificuldade, int quemComecaJogando, No noRaiz) ConfiguraJogo()
+        private static (int dificuldade, int quemComecaJogando, No noRaiz) ConfiguraJogo()
         {
             int dificuldade, 
                 quemComecaJogando = 1;
@@ -55,7 +55,7 @@ namespace JogoDaVelhaConsole
             return (dificuldade, quemComecaJogando, noRaiz);
         }
 
-        public static void PreencheArvore(No noPai, int quemEstaJogando)
+        private static void PreencheArvore(No noPai, int quemEstaJogando)
         {
             for (int i = 0; i < 3; i++)
             {
@@ -83,7 +83,7 @@ namespace JogoDaVelhaConsole
             }
         }
 
-        public static int AvaliaMiniMax(No no, int proximoJogador, int dificuldade)
+        private static int AvaliaMiniMax(No no, int proximoJogador, int dificuldade)
         {
             var ganhador = no.EncontraGanhador();
             if (ganhador != 2 || dificuldade == 0)
@@ -127,7 +127,7 @@ namespace JogoDaVelhaConsole
             return 0;
         }
 
-        public static int IniciaJogo(No no, int proximoJogador)
+        private static int IniciaJogo(No no, int proximoJogador)
         {
             AtualizaTabuleiro(no.Jogo);
             ConsoleExtension.ImprimeTabuleiro(no.Jogo);
@@ -139,7 +139,7 @@ namespace JogoDaVelhaConsole
             } else {
                 if (proximoJogador == 1)
                 {    
-                    if(TabuleiroEstaVazio())
+                    if(TabuleiroEstaVazio()) //IA faz jogada aleatória se o tabuleiro estiver vazio
                     {
                         Random random = new Random();
                         int indiceAleatorio = random.Next(no.Filhos.Count);
@@ -162,7 +162,7 @@ namespace JogoDaVelhaConsole
                             }
                         }
 
-                        if(heuristicaOpcional)
+                        if(heuristicaOpcional) //Heuristica opcional
                         {
                             int indiceRandomico = RandomizaMelhorFilho(no.Filhos, indiceMelhorFilho);
                             int posicaoRandomicaJogada = LugarJogado(no.Filhos[indiceRandomico].Jogo);
@@ -191,7 +191,7 @@ namespace JogoDaVelhaConsole
                     do {
                         ConsoleExtension.ExibeJogadaHumano();
                         var jogada = int.Parse(Console.ReadLine());
-                        coordenada = TraduzPosicao(jogada, no.Jogo);
+                        coordenada = PosicaoParaCoordenada(jogada);
                         if(no.Jogo[coordenada.i, coordenada.j] != 0)
                         {
                             ConsoleExtension.JogadaInvalida();
@@ -219,7 +219,7 @@ namespace JogoDaVelhaConsole
             return 0;
         }
 
-        public static int RandomizaMelhorFilho(List<No> filhos, int indiceMelhorFilho)
+        private static int RandomizaMelhorFilho(List<No> filhos, int indiceMelhorFilho)
         {
             List<int> filhosComMesmaPontuacao = new List<int>();
             for(int i = 0; i < filhos.Count; i++)
@@ -263,7 +263,7 @@ namespace JogoDaVelhaConsole
             return posicoesVazias.Count == 0 ? true : false;
         }
 
-        public static (int i, int j) TraduzPosicao(int jogada, int[,] jogo)
+        public static (int i, int j) PosicaoParaCoordenada(int jogada)
         {
             return jogada switch 
             {
@@ -295,7 +295,7 @@ namespace JogoDaVelhaConsole
             return true;
         }
 
-        public static void AtualizaTabuleiro(int[,] jogo)
+        private static void AtualizaTabuleiro(int[,] jogo)
         {
             for (int i = 0; i < 3; i++)
             {
