@@ -8,6 +8,7 @@ namespace JogoDaVelhaConsole
     public class Program
     {
         public static int[,] tabuleiro = new int[3,3];
+        public static bool heuristicaOpcional = true;
 
         public static void Main(string[] args)
         {  
@@ -17,16 +18,41 @@ namespace JogoDaVelhaConsole
         public static void JogoDaVelha()
         {
             ConsoleExtension.ExibeMensagemDeBemVindo();
-            ConsoleExtension.ExibeEscolhaDeJogador();
+            
+            var configuracao = ConfiguraJogo();
+            PreencheArvore(configuracao.noRaiz, configuracao.quemComecaJogando);
+            AvaliaMiniMax(configuracao.noRaiz, configuracao.quemComecaJogando, configuracao.dificuldade);
+            IniciaJogo(configuracao.noRaiz, configuracao.quemComecaJogando);
+        }
+
+        public static (int dificuldade, int quemComecaJogando, No noRaiz) ConfiguraJogo()
+        {
+            int dificuldade, 
+                quemComecaJogando = 1;
+
+            do{
+                ConsoleExtension.ExibeEscolhaDeDificuldade();
+                dificuldade = int.Parse(Console.ReadLine());
+                if(dificuldade < 1 || dificuldade > 9)
+                    ConsoleExtension.OpcaoInvalida();
+            }while(dificuldade < 1 || dificuldade > 9);
+    
+            do{
+                ConsoleExtension.ExibeEscolhaDeJogador();
+                quemComecaJogando = int.Parse(Console.ReadLine());
+                if(quemComecaJogando != 1 && quemComecaJogando != 2)
+                    ConsoleExtension.OpcaoInvalida();
+            }while(quemComecaJogando != 1 && quemComecaJogando != 2);
+
+
+            ConsoleExtension.ExibeOpcaoDeHeuristica();
+            heuristicaOpcional = int.Parse(Console.ReadLine()) == 1 ? true : false;
 
             No noRaiz = new No();
             noRaiz.Jogo = new int[3, 3];
-            var quemEstaJogando = int.Parse(Console.ReadLine());
-            quemEstaJogando = quemEstaJogando == 1 ? 1 : -1; 
+            quemComecaJogando = quemComecaJogando == 1 ? 1 : -1; 
 
-            PreencheArvore(noRaiz, quemEstaJogando);
-            AvaliaMiniMax(noRaiz, quemEstaJogando);
-            IniciaJogo(noRaiz, quemEstaJogando);
+            return (dificuldade, quemComecaJogando, noRaiz);
         }
 
         public static void PreencheArvore(No noPai, int quemEstaJogando)
@@ -57,10 +83,10 @@ namespace JogoDaVelhaConsole
             }
         }
 
-        public static int AvaliaMiniMax(No no, int proximoJogador)
+        public static int AvaliaMiniMax(No no, int proximoJogador, int dificuldade)
         {
             var ganhador = no.EncontraGanhador();
-            if (ganhador != 2)
+            if (ganhador != 2 || dificuldade == 0)
             {
                 if (ganhador == 1)
                 {
@@ -81,7 +107,7 @@ namespace JogoDaVelhaConsole
                 {
                     for (int i = 0; i < no.Filhos.Count; i++)
                     {
-                        var resultado = AvaliaMiniMax(no.Filhos[i], proximoJogador * (-1));
+                        var resultado = AvaliaMiniMax(no.Filhos[i], proximoJogador * (-1), (dificuldade-1));
                         if (resultado < no.ValorMinMax)
                             no.ValorMinMax = resultado;
                     }
@@ -91,7 +117,7 @@ namespace JogoDaVelhaConsole
                 {
                     for (int i = 0; i < no.Filhos.Count; i++)
                     {
-                        var resultado = AvaliaMiniMax(no.Filhos[i], proximoJogador * (-1));
+                        var resultado = AvaliaMiniMax(no.Filhos[i], proximoJogador * (-1), (dificuldade-1));
                         if (resultado > no.ValorMinMax)
                             no.ValorMinMax = resultado;
                     }
@@ -117,7 +143,6 @@ namespace JogoDaVelhaConsole
                     {
                         Random random = new Random();
                         int indiceAleatorio = random.Next(no.Filhos.Count);
-                        Console.WriteLine(indiceAleatorio);
                         AtualizaTabuleiro(no.Filhos[indiceAleatorio].Jogo);
 
                         ConsoleExtension.ImprimeTabuleiro(no.Jogo);
@@ -127,24 +152,36 @@ namespace JogoDaVelhaConsole
                         IniciaJogo(no.Filhos[indiceAleatorio], proximoJogador*(-1));
                     } else {
                         int melhorPontuacao = Int32.MinValue;
-                        int melhorFilho = 0;
+                        int indiceMelhorFilho = 0;
                         for (int i = 0; i < no.Filhos.Count; i++)
                         {
                             if (no.Filhos[i].ValorMinMax > melhorPontuacao)
                             {
                                 melhorPontuacao = no.Filhos[i].ValorMinMax;
-                                melhorFilho = i;
+                                indiceMelhorFilho = i;
                             }
                         }
 
-                        var posicaoJogada= CoordenadaParaPosicao(no.Filhos[melhorFilho].Jogo);
-                        AtualizaTabuleiro(no.Filhos[melhorFilho].Jogo);
+                        if(heuristicaOpcional)
+                        {
+                            int indiceRandomico = RandomizaMelhorFilho(no.Filhos, indiceMelhorFilho);
+                            int posicaoRandomicaJogada = LugarJogado(no.Filhos[indiceRandomico].Jogo);
+                            AtualizaTabuleiro(no.Filhos[indiceRandomico].Jogo);
+                            ConsoleExtension.ExibeJogadaDaMaquina(posicaoRandomicaJogada);
+                            ConsoleExtension.ImprimeTabuleiro(no.Jogo);
+                            Thread.Sleep(2000);
 
-                        ConsoleExtension.ImprimeTabuleiro(no.Jogo);
-                        ConsoleExtension.ExibeJogadaDaMaquina(posicaoJogada);
-                        Thread.Sleep(2000);
+                            IniciaJogo(no.Filhos[indiceRandomico], proximoJogador*(-1));
+                        } else {
+                            var posicaoJogada = LugarJogado(no.Filhos[indiceMelhorFilho].Jogo);
+                            AtualizaTabuleiro(no.Filhos[indiceMelhorFilho].Jogo);
 
-                        IniciaJogo(no.Filhos[melhorFilho], proximoJogador*(-1));
+                            ConsoleExtension.ImprimeTabuleiro(no.Jogo);
+                            ConsoleExtension.ExibeJogadaDaMaquina(posicaoJogada);
+                            Thread.Sleep(2000);
+
+                            IniciaJogo(no.Filhos[indiceMelhorFilho], proximoJogador*(-1));
+                        }
                     }
                 }
                 else
@@ -171,7 +208,6 @@ namespace JogoDaVelhaConsole
                             if (ComparaTabuleiro(filho.Jogo))
                             {
                                 filhoCorreto = index;
-                                Console.WriteLine(filhoCorreto);
                             }
                         }
                         IniciaJogo(no.Filhos[filhoCorreto], proximoJogador * (-1));
@@ -183,6 +219,22 @@ namespace JogoDaVelhaConsole
             return 0;
         }
 
+        public static int RandomizaMelhorFilho(List<No> filhos, int indiceMelhorFilho)
+        {
+            List<int> filhosComMesmaPontuacao = new List<int>();
+            for(int i = 0; i < filhos.Count; i++)
+            {
+                if(filhos[i].ValorMinMax == filhos[indiceMelhorFilho].ValorMinMax)
+                {
+                    filhosComMesmaPontuacao.Add(i);
+                }
+            }
+
+            int indiceRandomico = new Random().Next(filhosComMesmaPontuacao.Count);
+
+            return filhosComMesmaPontuacao[indiceRandomico];
+        }
+
         public static bool TabuleiroEstaVazio()
         {
             List<int> posicoesVazias = new List<int>();
@@ -191,7 +243,7 @@ namespace JogoDaVelhaConsole
                 for(int j = 0; j < 3; j++)
                 {
                     if(tabuleiro[i, j] == 0)
-                        posicoesVazias.Add(CoordenadaParaPosicao(tabuleiro));
+                        posicoesVazias.Add(CoordenadaParaPosicao(i, j));
                 }
             }
             return posicoesVazias.Count == 9 ? true : false;
@@ -205,7 +257,7 @@ namespace JogoDaVelhaConsole
                 for(int j = 0; j < 3; j++)
                 {
                     if(tabuleiro[i, j] == 0)
-                        posicoesVazias.Add(CoordenadaParaPosicao(tabuleiro));
+                        posicoesVazias.Add(CoordenadaParaPosicao(i, j));
                 }
             }
             return posicoesVazias.Count == 0 ? true : false;
@@ -254,7 +306,7 @@ namespace JogoDaVelhaConsole
             }
         }
 
-        public static int CoordenadaParaPosicao(int[,] jogo)
+        public static int LugarJogado(int[,] jogo)
         {
             for(int i = 0; i < 3; i++)
             {
@@ -279,5 +331,22 @@ namespace JogoDaVelhaConsole
             }
             return 0;
         }        
+
+        public static int CoordenadaParaPosicao(int i, int j)
+        {
+            return (i, j) switch 
+            {
+                (0, 0) => 1,
+                (0, 1) => 2,
+                (0, 2) => 3,
+                (1, 0) => 4,
+                (1, 1) => 5,
+                (1, 2) => 6,
+                (2, 0) => 7,
+                (2, 1) => 8,
+                (2, 2) => 9,
+                _ => 0,
+            };
+        }
     }
 }

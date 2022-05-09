@@ -126,9 +126,6 @@ namespace JogoDaVelhaConsole.Extensions
 
         public static void ExibeEscolhaDeJogador()
         {
-            Console.ForegroundColor = ConsoleColor.Blue;
-            Console.WriteLine("=================================================");
-            Console.ResetColor();
             Console.Write("Quem começará jogando? [1 - ");
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.Write("Maquina");
@@ -167,9 +164,46 @@ namespace JogoDaVelhaConsole.Extensions
             Console.WriteLine();
         }
 
-        public static string SubstituiCaracter(int numero)
+        public static void ExibeEscolhaDeDificuldade()
         {
-            return numero switch
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine("=================================================");
+            Console.ResetColor();
+            Console.Write("Qual será a dificuldade? [1 - ");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write("Mais Fácil");
+            Console.ResetColor();
+            Console.Write(" | 9 - ");
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Write("Mais Difícil");
+            Console.ResetColor();
+            Console.WriteLine("]");
+
+        }
+
+        public static void ExibeOpcaoDeHeuristica()
+        {
+            Console.Write("Deseja utilizar a heuristica adicional? [ 1 - ");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write("Sim");
+            Console.ResetColor();
+            Console.Write(" | 2 - ");
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Write("Não");
+            Console.ResetColor();
+            Console.WriteLine("]");
+        }
+
+        public static void OpcaoInvalida()
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Opção Inválida");
+            Console.ResetColor();
+        }
+
+        public static string SubstituiCaracter(int jogador)
+        {
+            return jogador switch
             {
                 1 => "X",
                 -1 => "O",
